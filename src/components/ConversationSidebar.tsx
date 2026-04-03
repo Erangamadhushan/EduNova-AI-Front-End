@@ -49,7 +49,7 @@ const ConversationSidebar = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              <h1 className="text-lg font-bold text-foreground">StudyAI</h1>
+              <h1 className="text-lg font-bold text-foreground">EduNovaAI</h1>
             </div>
             <button onClick={onClose} className="lg:hidden text-muted-foreground">
               <X className="h-5 w-5" />

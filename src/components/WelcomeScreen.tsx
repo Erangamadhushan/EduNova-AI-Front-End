@@ -33,7 +33,7 @@ const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
         className="text-center mb-8"
       >
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-          Welcome to <span className="text-primary">StudyAI</span>
+          Welcome to <span className="text-primary">EduNovaAI</span>
         </h2>
         <p className="text-muted-foreground text-sm md:text-base max-w-md">
           Your personal AI study companion. Ask questions, get explanations, and ace your exams!

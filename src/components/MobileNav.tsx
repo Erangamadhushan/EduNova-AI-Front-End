@@ -18,7 +18,7 @@ const tabs: { id: Tab; icon: typeof Home; label: string }[] = [
 
 const MobileNav = ({ activeTab, onTabChange }: MobileNavProps) => {
   return (
-    <nav className="lg:hidden border-t border-border bg-card flex items-center justify-around py-1.5 px-2">
+    <nav className="lg:hidden border-t border-border bg-card flex items-center py-1.5 px-2">
       {tabs.map((tab) => (
         <button
           key={tab.id}
