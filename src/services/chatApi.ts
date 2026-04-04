@@ -44,7 +44,7 @@ export const getMessages = (conversationId: number) => {
 };
 
 export const askQuestion = (data: ChatRequest) => {
-  return API.post<string>("/notes/chat", data);
+  return API.post<{ conversationId: number; answer: string }>("/chat/conversations", data);
 };
 
 export const getNotes = () => {

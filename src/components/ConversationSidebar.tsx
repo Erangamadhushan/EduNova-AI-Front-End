@@ -78,14 +78,16 @@ const ConversationSidebar = ({
                 <Pin className="h-3 w-3" />
                 Pinned
               </div>
-              {pinned.map((c) => (
+              {recent ? pinned.map((c) => (
                 <ConversationItem
                   key={c.id}
                   conversation={c}
                   active={c.id === activeId}
                   onClick={() => { onSelect(c.id); onClose(); }}
                 />
-              ))}
+              )) : (
+                <div className="px-3 py-2 text-sm text-muted-foreground">No pinned conversations </div>
+              )}
             </div>
           )}
 

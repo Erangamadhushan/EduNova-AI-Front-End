@@ -41,7 +41,7 @@ const Index = () => {
       try {
         const res = await getConversations();
 
-        const mapped = res.data.map((c: any) => ({
+        const mapped = res.data.answer.map((c: any) => ({
           id: c.id.toString(),
           title: c.title,
           preview: "Click to view messages...",
@@ -78,12 +78,12 @@ const Index = () => {
 
       try {
         const res = await askQuestion({ question: text });
-        console.log("API Response:", res.data); // ✅ log the response
+        console.log("API Response:", res.data.answer); 
 
         const aiMsg: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: res.data, // ✅ typed as string
+          content: res.data.answer, 
           timestamp: new Date(),
         };
 
