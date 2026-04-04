@@ -49,7 +49,7 @@ const ConversationSidebar = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              <h1 className="text-lg font-bold text-foreground">StudyAI</h1>
+              <h1 className="text-lg font-bold text-foreground">EduNovaAI</h1>
             </div>
             <button onClick={onClose} className="lg:hidden text-muted-foreground">
               <X className="h-5 w-5" />
@@ -78,14 +78,16 @@ const ConversationSidebar = ({
                 <Pin className="h-3 w-3" />
                 Pinned
               </div>
-              {pinned.map((c) => (
+              {recent ? pinned.map((c) => (
                 <ConversationItem
                   key={c.id}
                   conversation={c}
                   active={c.id === activeId}
                   onClick={() => { onSelect(c.id); onClose(); }}
                 />
-              ))}
+              )) : (
+                <div className="px-3 py-2 text-sm text-muted-foreground">No pinned conversations </div>
+              )}
             </div>
           )}
 

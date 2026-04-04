@@ -1,25 +1,25 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Menu } from "lucide-react";
-import ConversationSidebar, { Conversation } from "@/components/ConversationSidebar";
+import ConversationSidebar, {
+  Conversation,
+} from "@/components/ConversationSidebar";
 import ChatArea, { ChatMessage } from "@/components/ChatArea";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import MobileNav from "@/components/MobileNav";
-
-const mockConversations: Conversation[] = [
-  { id: "1", title: "What is the value of g on moon?", preview: "The acceleration due to gravity on...", pinned: true, timestamp: new Date() },
-  { id: "2", title: "Formula of nickel iodide", preview: "The chemical formula of nickel (II) io...", pinned: true, timestamp: new Date() },
-  { id: "3", title: "Earth size and shape", preview: "The Earth is an oblate spheroid...", pinned: false, timestamp: new Date() },
-  { id: "4", title: "Quadratic formula explained", preview: "The quadratic formula is x = -b ± √(b²-4ac)/2a...", pinned: false, timestamp: new Date() },
-];
+import { askQuestion, getConversations, getMessages } from "@/services/chatApi";
 
 const Index = () => {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversation, setActiveConversation] = useState<string | null>(
+    null,
+  );
   const [messages, setMessages] = useState<Record<string, ChatMessage[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [mobileTab, setMobileTab] = useState<"home" | "courses" | "ask" | "free" | "downloads">("ask");
+  const [mobileTab, setMobileTab] = useState<
+    "home" | "courses" | "ask" | "free" | "downloads"
+  >("ask");
 
   const handleNewChat = useCallback(() => {
     const id = Date.now().toString();
@@ -36,8 +36,30 @@ const Index = () => {
     setShowWelcome(false);
   }, []);
 
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const res = await getConversations();
+
+        const mapped = res.data.answer.map((c: any) => ({
+          id: c.id.toString(),
+          title: c.title,
+          preview: "Click to view messages...",
+          pinned: false,
+          timestamp: new Date(),
+        }));
+
+        setConversations(mapped);
+      } catch (err) {
+        console.error("Failed to load conversations");
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
   const handleSend = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (!activeConversation) return;
 
       const userMsg: ChatMessage = {
@@ -52,32 +74,40 @@ const Index = () => {
         [activeConversation]: [...(prev[activeConversation] || []), userMsg],
       }));
 
-      // Update conversation title if first message
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === activeConversation && c.title === "New Chat"
-            ? { ...c, title: text.slice(0, 40), preview: text.slice(0, 60) }
-            : c
-        )
-      );
-
-      // Simulate AI response
       setIsLoading(true);
-      setTimeout(() => {
+
+      try {
+        const res = await askQuestion({ question: text });
+        console.log("API Response:", res.data.answer); 
+
         const aiMsg: ChatMessage = {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: `That's a great question about "${text.slice(0, 30)}..." Let me help you understand this topic. This is a mock response — connect the AI backend to get real answers!`,
+          content: res.data.answer, 
           timestamp: new Date(),
         };
+
         setMessages((prev) => ({
           ...prev,
           [activeConversation]: [...(prev[activeConversation] || []), aiMsg],
         }));
-        setIsLoading(false);
-      }, 1200);
+      } catch (error) {
+        const errorMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "⚠️ Server is busy. Please try again.",
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => ({
+          ...prev,
+          [activeConversation]: [...(prev[activeConversation] || []), errorMsg],
+        }));
+      }
+
+      setIsLoading(false);
     },
-    [activeConversation]
+    [activeConversation],
   );
 
   const handleGetStarted = () => {
@@ -85,9 +115,22 @@ const Index = () => {
     handleNewChat();
   };
 
-  const handleSelectConversation = (id: string) => {
+  const handleSelectConversation = async (id: string) => {
+    const convId = Number(id); // convert properly
+
     setActiveConversation(id);
     setShowWelcome(false);
+
+    try {
+      const res = await getMessages(convId);
+
+      setMessages((prev) => ({
+        ...prev,
+        [id]: res.data,
+      }));
+    } catch (err) {
+      console.error("Failed to load messages");
+    }
   };
 
   return (
@@ -105,10 +148,13 @@ const Index = () => {
         <main className="flex-1 flex flex-col min-h-0 bg-background">
           {/* Mobile top bar */}
           <div className="lg:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
-            <button onClick={() => setSidebarOpen(true)} className="text-foreground">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="text-foreground"
+            >
               <Menu className="h-5 w-5" />
             </button>
-            <h1 className="text-base font-bold text-foreground">StudyAI</h1>
+            <h1 className="text-base font-bold text-foreground">EduNovaAI</h1>
           </div>
 
           {showWelcome ? (
@@ -126,7 +172,9 @@ const Index = () => {
         </main>
       </div>
 
-      <MobileNav activeTab={mobileTab} onTabChange={setMobileTab} />
+      <div className="fixed bottom-0 left-0 flex">
+        <MobileNav activeTab={mobileTab} onTabChange={setMobileTab} />
+      </div>
     </div>
   );
 };
